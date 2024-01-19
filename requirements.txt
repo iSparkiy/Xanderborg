@@ -1,0 +1,6 @@
+py-cord
+flask
+python-dotenv
+pillow
+scrapetube
+beautifulsoup4
