@@ -89,7 +89,7 @@ async def info(ctx):
         color=discord.Color.from_rgb(104, 227, 213),
         description="ʕ•́ᴥ•̀ʔっ Holi, soy un bot creado para añadir funcionalidades y mecanicas al servidor de Xander_z para hacer más divertida tu instancia en este servidor :D")
     author = await bot.fetch_user("1044034580996427816") # Yo :b
-    embed.add_field(name="Repositorio de GitHub", value="[Click para ver](https://github.com/iSparkiy/Xander_z-bot)")
+    embed.add_field(name="Repositorio de GitHub", value="[Click para ver](https://github.com/iSparkiy/Xanderborg)")
     embed.set_thumbnail(url=bot.user.avatar.url)
     embed.set_image(url="https://piks.eldesmarque.com/bin/esports/2021/06/buzz.jpg")
     embed.set_footer(text=f"¡Bot creado por @{author.name}!" , icon_url=author.avatar.url)
