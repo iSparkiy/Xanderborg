@@ -5,30 +5,57 @@ import scrapetube
 import requests
 import asyncio
 import random
+import mysql.connector
+import json
 from bs4 import BeautifulSoup
 from PIL import Image
 from dotenv import load_dotenv
 # BOT
 load_dotenv()
-bot = discord.Bot(intents=discord.Intents.all(),activity=discord.Activity(type=discord.ActivityType.watching, name="Un video de Xander_z 🍷🗿"))
-
+bot = discord.Bot(intents=discord.Intents.all(),activity=discord.Activity(type=discord.ActivityType.watching, name="Iniciando bot, espera..."))
+# COMMANDS
 async def update():
   while True:
-      videos = scrapetube.get_channel(channel_username="Xander_Z", limit=1, sort_by="newest")
-      lastest_video = None
-      for video in videos:
+    try:
+        data = None
+        with open("base.json", "r") as json_data:
+          data = json.load(json_data)
+        videos = scrapetube.get_channel(channel_username="Xander_Z", limit=1, sort_by="newest")
+        lastest_video = None
+        for video in videos:
           lastest_video = video["videoId"]
-      r = requests.get(f"https://www.youtube.com/watch?v={lastest_video}")
-      soup = BeautifulSoup(r.text, features="lxml")
-      link = soup.find_all(name="title")[0]
-      title = str(link)
-      title = title.replace("<title>","")
-      title = title.replace("</title>","")
-      title = title.replace(" - YouTube","")
-      activity = discord.Activity(type=discord.ActivityType.playing, name=f"Viendo {title} de Xander_z")
-      await bot.change_presence(activity=activity)
-      print("updating presence")
-      await asyncio.sleep(60)
+        r = requests.get(f"https://www.youtube.com/watch?v={lastest_video}")
+        soup = BeautifulSoup(r.text, features="lxml")
+        link = soup.find_all(name="title")[0]
+        title = str(link)
+        title = title.replace("<title>","")
+        title = title.replace("</title>","")
+        title = title.replace(" - YouTube","")
+        activity = discord.Activity(type=discord.ActivityType.playing, name=f"Viendo {title} de Xander_z")
+        await bot.change_presence(activity=activity)
+        if lastest_video != data["url"]:
+           dict = {
+               "url":lastest_video
+           }
+           with open("base.json", "w") as file:
+               json.dump(dict, file)
+           notify_channel = bot.get_channel(1144768943643447383)
+           author = await bot.fetch_user(1101621392547528734)
+           embed = discord.Embed(
+             title = "¡Nuevo video de Xander_z!",
+             description = "Ve a ver el nuevo video de mi patrón 🛐\n<@&1144768942452248631> 🦖",
+             color = discord.Color.from_rgb(188, 241, 132)
+           )
+           embed.set_author(name="@Xander_z", icon_url = author.avatar.url)
+           embed.set_thumbnail(url=bot.user.avatar.url)
+           embed.add_field(name=f"'{title}'",value=f"[¡Click para ver el video!](https://www.youtube.com/watch?v={lastest_video})")
+           await notify_channel.send(embed=embed)
+        print("updating presence")
+        await asyncio.sleep(60)
+      
+    except Exception as error:
+        print(f"Algo salio mal, reintentando: {error}")
+        await asyncio.sleep(60)
 
 @bot.event
 async def on_ready():
