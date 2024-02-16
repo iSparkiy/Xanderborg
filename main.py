@@ -1,20 +1,27 @@
 # DEPENDENCIAS
-import discord
-import os
-import scrapetube
-import requests
-import asyncio
-import random
-import mysql.connector
-import json
-from bs4 import BeautifulSoup
-from PIL import Image
-from dotenv import load_dotenv
+try:
+    import discord
+    import os
+    import scrapetube
+    import requests
+    import asyncio
+    import random
+    import json
+    from bs4 import BeautifulSoup
+    from PIL import Image
+    from dotenv import load_dotenv
+except Error as e:
+    print(f"Error obteniendo dependencias: {e}")
+
 # BOT
 load_dotenv()
 bot = discord.Bot(intents=discord.Intents.all(),activity=discord.Activity(type=discord.ActivityType.watching, name="Iniciando bot, espera..."))
+
+# GROUPS
+medidor = bot.create_group(name="medidor")
+info = bot.create_group(name = "info")
 # COMMANDS
-async def update():
+async def update(): # Update the bot status
   while True:
     try:
         data = None
@@ -43,27 +50,29 @@ async def update():
            author = await bot.fetch_user(1101621392547528734)
            embed = discord.Embed(
              title = "¡Nuevo video de Xander_z!",
-             description = "Ve a ver el nuevo video de mi patrón 🛐\n<@&1144768942452248631> 🦖",
+             description = "Ve a ver el nuevo video de mi patrón 🛐\n<@&1179171991291428884> 🦖",
              color = discord.Color.from_rgb(188, 241, 132)
            )
            embed.set_author(name="@Xander_z", icon_url = author.avatar.url)
            embed.set_thumbnail(url=bot.user.avatar.url)
            embed.add_field(name=f"'{title}'",value=f"[¡Click para ver el video!](https://www.youtube.com/watch?v={lastest_video})")
-           await notify_channel.send(embed=embed)
+           file = discord.File("images/spike.jpg", filename="spike.jpg")
+           embed.set_image(url="attachment://spike.jpg")
+           await notify_channel.send(embed=embed, file=file)
         print("updating presence")
-        await asyncio.sleep(60)
+        await asyncio.sleep(90)
       
     except Exception as error:
         print(f"Algo salio mal, reintentando: {error}")
-        await asyncio.sleep(60)
+        await asyncio.sleep(120)
 
 @bot.event
-async def on_ready():
+async def on_ready(): # Setup the bot
     print(f"Sesión iniciada cómo {bot.user}")
     await update()
   
 @bot.event
-async def on_message(message):
+async def on_message(message): # Idk what is this
     if message.author == bot.user:
         return
     if message.content.lower() == "han cambiado la imagen de las arqueras":
@@ -79,7 +88,23 @@ async def on_message(message):
         embed.set_image(url="attachment://tumbao.png")
         await message.reply(embed=embed, file=file)
 
-@bot.command(description="¡Conoce mi latencia actual!")
+@bot.event
+async def on_message(message): # The boost message
+    if message.author == bot.user: return
+    if (message.type == discord.MessageType.premium_guild_subscription): return
+    if (message.author.id != 1044034580996427816): return
+    boost_author = message.author
+    embed = discord.Embed(
+        title = "¡Gracias por el boost!",
+        color = discord.Color.from_rgb(219, 176, 252),
+        description="¡Te damos las gracias por tu contribución!"
+    )
+    embed.set_thumbnail(url=message.guild.icon.url)
+    embed.set_author(name=f"De {message.guild.name}", icon_url=bot.user.avatar.url)
+    embed.set_footer(text=f"Para '{boost_author.name}'", icon_url=boost_author.avatar.url)
+    await boost_author.send(embed=embed)
+
+@info.command(description="¡Conoce mi latencia actual!") # A info command
 async def ping(ctx):
     embed = discord.Embed(
         title="¡Pong 🏓!",
@@ -88,7 +113,7 @@ async def ping(ctx):
      )
     await ctx.respond(embed=embed)
 
-@bot.command(description="¡Te diré que tan insano eres!")
+@medidor.command(description="¡Te diré que tan insano eres!")
 async def insanidad(
   ctx,
   usuario: discord.Option(discord.Member, "Selecciona un usuario", required = False, default = None)
@@ -109,8 +134,9 @@ async def insanidad(
     embed.set_author(name=f"Pedido por @{ctx.author.name}", icon_url=ctx.author.avatar.url)
     embed.set_image(url="https://i.pinimg.com/originals/53/40/bd/5340bd78187d42b45963f76d639e2bbf.gif")
     await ctx.respond(embed=embed)
-@bot.command(description="¡Mira mi código fuente!")
-async def info(ctx):
+
+@info.command(description="¡Mira mi código fuente!")
+async def fuente(ctx):
     embed = discord.Embed(
         title="**Sobre mí** <:buzz:1194513196611010560>", 
         color=discord.Color.from_rgb(104, 227, 213),
@@ -122,4 +148,5 @@ async def info(ctx):
     embed.set_footer(text=f"¡Bot creado por @{author.name}!" , icon_url=author.avatar.url)
     await ctx.respond(embed=embed, ephemeral=False)
 
+# RUN
 bot.run(os.getenv('TOKEN'))
